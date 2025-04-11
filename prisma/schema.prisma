@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  firstName      String
+  middleName     String?
+  lastName       String
+  email          String           @unique
+  passwordHash   String
+  phone          String           @unique
+  Booking        Booking[]
+  activity       Activity[]
+  Review         Review[]
+  BookingPayment BookingPayment?
+  SupportTicket  SupportTicket[]
+  ServicePayment ServicePayment[]
+  ServiceOrder   ServiceOrder[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  content   String
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Room      Room?    @relation(fields: [roomId], references: [id])
+  roomId    Int?
+  createdAt DateTime
+}
+
+model Room {
+  id          Int       @id @default(autoincrement())
+  number      Int       @unique
+  description String
+  capacity    Int
+  price       Decimal
+  status      String
+  Review      Review[]
+  Booking     Booking[]
+  Image       Image[]
+}
+
+model Image {
+  id       Int    @id @default(autoincrement())
+  fileName String @unique
+  url      String @unique
+  path     String @unique
+
+  Room   Room? @relation(fields: [roomId], references: [id])
+  roomId Int?
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  startDate  DateTime
+  endDate    DateTime
+  date       DateTime
+  totalPrice Decimal
+  status     String
+  Room       Room?    @relation(fields: [roomId], references: [id])
+  roomId     Int?
+
+  BookingPayment BookingPayment?
+  User           User?           @relation(fields: [userId], references: [id])
+  userId         Int?
+}
+
+model BookingPayment {
+  id        Int      @id @default(autoincrement())
+  Booking   Booking? @relation(fields: [bookingId], references: [id])
+  bookingId Int?     @unique
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?     @unique
+  date      DateTime
+  sum       Decimal
+}
+
+model SupportTicket {
+  id          Int    @id @default(autoincrement())
+  description String
+  status      String
+  assignedTo  String
+
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      Int?
+  ChatMessage ChatMessage[]
+}
+
+model ChatMessage {
+  id              Int            @id @default(autoincrement())
+  senderId        Int
+  message         String
+  time            DateTime
+  SupportTicket   SupportTicket? @relation(fields: [supportTicketId], references: [id])
+  supportTicketId Int?
+}
+
+model ServicePayment {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Service   Service? @relation(fields: [serviceId], references: [id])
+  serviceId Int?     @unique
+}
+
+model Service {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String
+  price          Decimal
+  ServicePayment ServicePayment?
+  ServiceOrder   ServiceOrder?
+}
+
+model ServiceOrder {
+  id Int @id @default(autoincrement())
+
+  User      User?      @relation(fields: [userId], references: [id])
+  userId    Int?
+  Service   Service    @relation(fields: [serviceId], references: [id])
+  serviceId Int        @unique
+  Employee  Employee[]
+}
+
+model Employee {
+  id               Int            @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  middleName       String?
+  salary           Decimal
+  role             String
+  dateOfEmployment DateTime
+  phone            String
+  email            String
+  dateOfBirth      DateTime
+  passport         String
+  address          String
+  position         String
+  Activity         Activity[]
+  WorkTime         WorkTime[]
+  ServiceOrder     ServiceOrder[]
+}
+
+model Activity {
+  id             Int      @id @default(autoincrement())
+  name           String
+  price          Decimal
+  description    String
+  dateOfActuvity DateTime
+  avaliblePlace  Int
+
+  User     User[]
+  Employee Employee[]
+}
+
+model WorkTime {
+  id        Int        @id @default(autoincrement())
+  startWork DateTime
+  endWork   DateTime
+  date      DateTime
+  Employee  Employee[]
+}
