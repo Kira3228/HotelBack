@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { loginUserDto, RequestUserDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { User } from '@prisma/client';
+import { randomBytes } from 'crypto';
 import { use } from 'passport';
 
 @Injectable()
@@ -37,20 +38,25 @@ export class AuthService {
     });
   }
 
-  async login(
-    dto: loginUserDto,
-  ): Promise<{ token: string; user: Omit<User, 'passwordHash'> }> {
+  async login(dto: loginUserDto): Promise<{
+    access_token: string;
+    refresh_token: string;
+    user: Omit<User, 'passwordHash'>;
+  }> {
     const user = await this.validateUser(dto);
-    const token = await this.generateToken(user);
+    const access_token = await this.generateToken(user);
+    const refresh_token = await this.generateRefreshToken(user.id);
+
     const { passwordHash, ...userData } = user;
-    return { token, user: userData };
+    return { access_token, refresh_token, user: userData };
   }
 
-  async register(
-    dto: RequestUserDto,
-  ): Promise<{ token: string; user: Omit<User, 'passwordHash'> }> {
+  async register(dto: RequestUserDto): Promise<{
+    access_token: string;
+    refresh_token: string;
+    user: Omit<User, 'passwordHash'>;
+  }> {
     const candidate = await this.userService.getUserByEmail(dto.email);
-
     if (candidate) {
       throw new HttpException(
         'Пользователь с таким Email уже сущестет',
@@ -68,9 +74,10 @@ export class AuthService {
       passwordHash: hashPassword,
     });
 
-    const token = await this.generateToken(user);
+    const access_token = await this.generateToken(user);
+    const refresh_token = await this.generateRefreshToken(user.id);
     const { passwordHash, ...userData } = user;
-    return { token, user: userData };
+    return { access_token, refresh_token, user: userData };
   }
 
   private async generateToken(user: User): Promise<string> {
@@ -80,7 +87,60 @@ export class AuthService {
       middleName: user.middleName,
       id: user.id,
     };
+    return this.jwtService.sign(payload, {expiresIn: '15m'});
+  }
+  private async generateRefreshToken(userId: number): Promise<string> {
+    const token = randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    return this.jwtService.sign(payload);
+    await this.prisma.refreshToken.create({
+      data: {
+        token,
+        userId,
+        expiresAt,
+      },
+    });
+    return token;
+  }
+
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ access_token: string }> {
+    const tokenData = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+    if (!tokenData || tokenData.expiresAt < new Date()) {
+      throw new UnauthorizedException(
+        'Недействительный или просроченный токен',
+      );
+    }
+    const payload = {
+      firstName: tokenData.user.firstName,
+      middleName: tokenData.user.middleName,
+      lastName: tokenData.user.lastName,
+      id: tokenData.user.id,
+    };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({
+      where: {
+        token: refreshToken,
+      },
+    });
+    
   }
 }
+export type AuthResponse = {
+  access_token: string;
+  refresh_token: string;
+  user: Omit<User, 'passwordHash'>;
+};
+
+export type TokenResponse = {
+  access_token: string;
+};

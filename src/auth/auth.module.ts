@@ -12,7 +12,7 @@ import { UsersModule } from 'src/users/users.module';
     forwardRef(() => UsersModule),
     JwtModule.register({
       secret: 'secret_key',
-      signOptions: { expiresIn: '24h' },
+      signOptions: { expiresIn: '15m' },
     }),
   ],
   providers: [AuthService, PrismaService],

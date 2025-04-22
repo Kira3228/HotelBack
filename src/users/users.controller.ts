@@ -13,11 +13,13 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Пользователи')
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
-
+  
   @Post()
   async create(@Body() dto: CreateUserDto) {
     return await this.userService.create(dto);
