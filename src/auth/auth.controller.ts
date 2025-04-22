@@ -11,6 +11,7 @@ import { AuthResponse, AuthService, TokenResponse } from './auth.service';
 import { loginUserDto, RequestUserDto } from 'src/users/dto/user.dto';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwtAuth.guard';
+import { OptionalJwtGuard } from './guards/optional-jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -67,11 +68,23 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtGuard)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies['refresh_token'];
-    await this.authService.logout(refreshToken);
-    res.clearCookie('refresh_token');
-    return { message: 'Logged out' };
+    try{
+      const refreshToken = req.cookies.refresh_token;
+      if (refreshToken) {
+        await this.authService.logout(refreshToken);
+      }
+      res.clearCookie('refresh_token',{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+      return { message: 'Logged out' };
+    }
+    catch{
+      res.clearCookie('refresh_token')
+    }
+ 
   }
 }
