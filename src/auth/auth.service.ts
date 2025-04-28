@@ -87,7 +87,7 @@ export class AuthService {
       middleName: user.middleName,
       id: user.id,
     };
-    return this.jwtService.sign(payload, {expiresIn: '15m'});
+    return this.jwtService.sign(payload, { expiresIn: '15m' });
   }
   private async generateRefreshToken(userId: number): Promise<string> {
     const token = randomBytes(32).toString('hex');
@@ -132,7 +132,6 @@ export class AuthService {
         token: refreshToken,
       },
     });
-    
   }
 }
 export type AuthResponse = {

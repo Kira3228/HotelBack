@@ -30,6 +30,15 @@ export class UsersService {
     };
   }
   async create(dto: CreateUserDto) {
+    if (
+      dto.firstName.length === 0 ||
+      dto.lastName.length === 0 ||
+      dto.passwordHash.length === 0 ||
+      dto.email.length === 0 ||
+      dto.phone.length === 0
+    ) {
+      throw new BadRequestException(404, "Некорректные даныне")
+    }
     const { formattedFirstName, formattedLastName, formattedMiddleName } =
       this.formatFullName(dto.firstName, dto.lastName, dto.middleName ?? '');
     const formattedDto = {
@@ -58,9 +67,9 @@ export class UsersService {
           },
         },
         {
-          lastName: { 
-            contains: part, 
-            mode: 'insensitive' as Prisma.QueryMode
+          lastName: {
+            contains: part,
+            mode: 'insensitive' as Prisma.QueryMode,
           },
         },
         {
@@ -113,9 +122,9 @@ export class UsersService {
   }
   async getUserByEmail(email: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
-    
+
     return user;
   }
 }

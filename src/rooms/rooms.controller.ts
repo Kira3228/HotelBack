@@ -23,15 +23,7 @@ export class RoomsController {
   async getAll() {
     return await this.roomService.getAll();
   }
-  @Get('get-by-number/:number')
-  async getByNumber(@Param('number') number: number) {
-    return await this.roomService.getByNumber(number);
-  }
 
-  @Patch('update/:number')
-  async update(@Param() number: number, @Body() dto: UpdateRoomDto) {
-    return await this.roomService.update(number, dto);
-  }
   @Delete('delete/:id')
   async delete(@Param('id') id: number) {
     return this.roomService.delete(id);

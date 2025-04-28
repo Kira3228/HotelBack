@@ -10,15 +10,11 @@ export class RoomsService {
     return this.prisma.room.create({ data: dto });
   }
   async getAll() {
-    return this.prisma.room.findMany();
+    return this.prisma.room.findMany({include:{
+      Image: true
+    }});
   }
 
-  async getByNumber(number: number) {
-    return this.prisma.room.findUnique({ where: { number } });
-  }
-  async update(number: number, dto: UpdateRoomDto) {
-    return this.prisma.room.update({ where: { number }, data: { ...dto } });
-  }
   async delete(id: number) {
     return this.prisma.room.delete({ where: { id } });
   }

@@ -1,21 +1,23 @@
-import { IsDecimal, IsNumber, IsString } from 'class-validator';
+import { IsDecimal, IsInt, IsNumber, IsString } from 'class-validator';
 
 export class CreateRoomDto {
-  @IsNumber()
-  readonly number: number;
+  @IsString()
+  readonly name: string;
   @IsString()
   readonly description: string;
   @IsNumber()
   readonly capacity: number;
   @IsDecimal()
-  readonly price: number;
+  readonly price: string;
   @IsString()
   readonly status: string;
+  @IsInt()
+  readonly area: number;
 }
 
 export class UpdateRoomDto {
-  @IsNumber()
-  readonly number?: number;
+  @IsString()
+  readonly name?: string;
   @IsString()
   readonly description?: string;
   @IsNumber()
@@ -24,4 +26,6 @@ export class UpdateRoomDto {
   readonly price?: number;
   @IsString()
   readonly status?: string;
+  @IsInt()
+  readonly area?: number;
 }

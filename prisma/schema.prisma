@@ -13,8 +13,8 @@ model User {
   middleName     String?
   lastName       String
   email          String           @unique
-  passwordHash   String
   phone          String           @unique
+  passwordHash   String
   Booking        Booking[]
   activity       Activity[]
   Review         Review[]
@@ -47,11 +47,12 @@ model Review {
 
 model Room {
   id          Int       @id @default(autoincrement())
-  number      Int       @unique
+  name        String
   description String
   capacity    Int
-  price       Decimal
+  price       Decimal   @db.Decimal(10, 2)
   status      String
+  area        Int       @default(0)
   Review      Review[]
   Booking     Booking[]
   Image       Image[]
@@ -60,8 +61,8 @@ model Room {
 model Image {
   id       Int    @id @default(autoincrement())
   fileName String @unique
-  url      String @unique
-  path     String @unique
+  url      String
+  path     String
 
   Room   Room? @relation(fields: [roomId], references: [id])
   roomId Int?

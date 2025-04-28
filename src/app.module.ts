@@ -10,35 +10,24 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { RoomsModule } from './rooms/rooms.module';
 import { BookingModule } from './booking/booking.module';
-
+import { ImageController } from './image/image.controller';
+import { ImageService } from './image/image.service';
+import { ImageModule } from './image/image.module';
 
 @Module({
-  imports: [UsersModule, ReviewsModule, AuthModule,
-    MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueName = Date.now() + '-' +Math.round(Math.random()*1e9);
-          const ext = extname(file.originalname);
-          const filename = `${uniqueName}${ext}`;
-          callback(null,filename)
-        },
-      }),
-      limits:{
-        fileSize: 5*1024*1024,
-      },
-        fileFilter: (req, file, callback) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-          return callback(new Error('Only images are allowed!'), false);
-        }
-        callback(null, true);
-      },
-    }),
+  imports: [
+    UsersModule,
+    ReviewsModule,
+    AuthModule,
     RoomsModule,
-    BookingModule
+    BookingModule,
+    ImageModule,
+    MulterModule.register({
+      dest: './uploads'
+    })
   ],
-  controllers: [],
-  providers: [PrismaService, AuthService],
+  controllers: [ImageController],
+  providers: [PrismaService, AuthService, ImageService],
   exports: [PrismaService],
 })
 export class AppModule {}
