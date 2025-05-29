@@ -53,6 +53,7 @@ model Room {
   price       Decimal   @db.Decimal(10, 2)
   status      String
   area        Int       @default(0)
+  rating      Int       @default(0)
   Review      Review[]
   Booking     Booking[]
   Image       Image[]

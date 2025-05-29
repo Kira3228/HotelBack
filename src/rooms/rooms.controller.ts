@@ -23,7 +23,14 @@ export class RoomsController {
   async getAll() {
     return await this.roomService.getAll();
   }
-
+  @Get('avalible')
+  async getAvalible(){
+    return await this.roomService.getAvalible();
+  }
+  @Get('room/:id')
+  async getById(@Param('id') id: number){
+    return this.roomService.getById(id)
+  }
   @Delete('delete/:id')
   async delete(@Param('id') id: number) {
     return this.roomService.delete(id);
