@@ -13,6 +13,8 @@ import { BookingModule } from './booking/booking.module';
 import { ImageController } from './image/image.controller';
 import { ImageService } from './image/image.service';
 import { ImageModule } from './image/image.module';
+import { ServiceModule } from './service/service.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { ImageModule } from './image/image.module';
     ImageModule,
     MulterModule.register({
       dest: './uploads'
-    })
+    }),
+    ServiceModule,
+    ActivityModule
   ],
   controllers: [ImageController],
   providers: [PrismaService, AuthService, ImageService],
